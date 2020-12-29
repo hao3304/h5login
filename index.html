@@ -63,32 +63,58 @@
 </head>
 <body>
 <div class="imgBox">
-    <img src="images/bg.jpg">
-    <img src="images/logo.png" style="width: 100px;height:100px;position: absolute;top:50px;left: 50%;margin-left: -50px">
+    <img src="/images/bg.jpg">
+    <img src="/images/logo.png" style="width: 100px;height:100px;position: absolute;top:50px;left: 50%;margin-left: -50px">
 </div>
-<form class="itemBox" id="app">
-    <div class="item">
-        <div class="L"><img src="images/icon4.png"></div>
-        <div class="R"><input name="" type="text" placeholder="请输入用户名"></div>
+<div class="itemBox" id="app">
+    <div class="item" v-show="!ok">
+        <div class="L"><img src="/images/icon4.png"></div>
+        <div class="R"><input name="" v-model="username" type="text" placeholder="请输入用户名"></div>
     </div>
-    <div class="item">
-        <div class="L"><img src="images/icon5.png"></div>
-        <div class="R"><input name="" type="password" placeholder="请输入密码"></div>
+    <div class="item"  v-show="!ok">
+        <div class="L"><img src="/images/icon5.png"></div>
+        <div class="R"><input name="" v-model="password" type="password" placeholder="请输入密码"></div>
     </div>
-    <div class="item2">
-        <input name="" type="submit" class="btn" value="登录">
+    <p v-show="showError" style="text-align: center;color:red;">
+        {{error}}
+    </p>
+    <div class="item2"  v-show="!ok">
+        <input name="" type="submit" @click="onSubmit" class="btn" value="登录">
     </div>
-    <div class="item3" style="text-align: center;color:#666;">
+    <div class="item3" style="text-align: center;color:#666;"  v-show="!ok">
         请先下载宇通智联 APP
     </div>
-</form>
+    <h5 v-show="ok" style="font-size: 28px;text-align: center; color:green;font-weight: normal;padding: 10px;">登录成功！</h5>
+</div>
 </body>
 <script src="https://cdn.staticfile.org/vue/2.6.12/vue.min.js"></script>
+<script src="//cdn.staticfile.org/jquery/1.10.0/jquery.min.js"></script>
 <script type="text/javascript">
  new Vue({
      data() {
          return {
-
+            username: null,
+            password: null,
+            error: '',
+            showError: false,
+            ok: false
+         }
+     },
+     methods:{
+         onSubmit() {
+             if(!this.username || !this.password) {
+                  this.showError = true;
+                  this.error = '请输入正确用户名和密码！'
+                 return;
+             }
+             $.get('/oauth2/userlogin', {username: this.usernamem, password: this.password}).then(function (rep) {
+                 if(rep.code == '-1') {
+                     this.error = '用户名或密码错误！';
+                 } else if(rep.code == '0') {
+                     this.showError = false;
+                     this.ok = true;
+                 }
+             })
          }
      }
  }).$mount("#app")
